@@ -13,7 +13,7 @@ sudo apt install unrar -y
 # Verifica se o arquivo jdk1.8.0_212.part01.rar existe
 if [ -f "jdk1.8.0_212.part01.rar" ]; then
     echo "Descompactando os arquivos JDK..."
-    unrar x jdk1.8.0_212.part01.rar /usr/
+    unrar x jdk1.8.0_212.part01.rar -C /usr/
 else
     echo "Os arquivos JDK não foram encontrados!"
     exit 1
