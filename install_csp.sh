@@ -13,7 +13,7 @@ sudo apt install unrar -y
 # Verifica se o arquivo jdk1.8.0_212.part01.rar existe
 if [ -f "jdk1.8.0_212.part01.rar" ]; then
     echo "Descompactando os arquivos JDK..."
-    unrar x jdk1.8.0_212.part01.rar -C /usr/
+    unrar x jdk1.8.0_212.part01.rar /usr/
 else
     echo "Os arquivos JDK não foram encontrados!"
     exit 1
@@ -26,6 +26,10 @@ else
     echo "Erro ao descompactar o JDK. Verifique se os arquivos estão corretos."
     exit 1
 fi
+
+# Ajusta o proprietário da pasta descompactada para uucp
+echo "Ajustando o proprietário da pasta JDK para uucp..."
+sudo chown -R uucp:uucp /usr/jdk1.8.0_212
 
 # Adiciona o Java e o Javac às alternativas do sistema
 echo "Configurando as alternativas para Java e Javac..."
