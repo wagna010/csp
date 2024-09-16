@@ -60,7 +60,7 @@ chmod -R 755 /home/csps
 
 # Inicia o serviço cardproxy
 echo "Iniciando o serviço cardproxy..."
-/home/csps/csp ./cardproxy.sh start
+cd /home/csps/csp && ./cardproxy.sh start
 
 # Finaliza o script
 echo "Instalação do CSP e do Java concluída com sucesso."
