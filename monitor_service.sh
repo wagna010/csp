@@ -2,9 +2,7 @@
 
 # Definir a lista de diretórios que contêm os serviços
 SERVICE_DIRS=(
-    "/usr/local/csp1"
-    "/usr/local/csp2"
-    "/usr/local/csp3"
+    "/home/csps/csp"
 )
 
 # Nome do script do serviço
