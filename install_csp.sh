@@ -1,37 +1,66 @@
 #!/bin/bash
 
 # Atualiza os pacotes do sistema
+echo "Atualizando os pacotes do sistema..."
 sudo apt update -y
 
-# 1. Instala o Java (OpenJDK 8)
-echo "Instalando Java..."
-sudo apt install openjdk-8-jdk -y
+# Instala o unrar se não estiver instalado
+echo "Instalando o Unrar..."
+sudo apt install unrar -y
+
+# Parte 1: Instalação do Java a partir dos arquivos RAR
+
+# Descompacta os arquivos jdk1.8.0_212.part01.rar até jdk1.8.0_212.part08.rar diretamente na pasta /usr/
+echo "Descompactando os arquivos JDK..."
+unrar x jdk1.8.0_212.part01.rar /usr/
+
+# Verifica se o JDK foi descompactado corretamente
+if [ -d "/usr/jdk1.8.0_212" ]; then
+    echo "JDK descompactado com sucesso!"
+else
+    echo "Erro ao descompactar o JDK. Verifique se os arquivos estão corretos."
+    exit 1
+fi
+
+# Adiciona o Java e o Javac às alternativas do sistema
+echo "Configurando as alternativas para Java e Javac..."
+sudo update-alternatives --install /usr/bin/java java /usr/jdk1.8.0_212/bin/java 100
+sudo update-alternatives --install /usr/bin/javac javac /usr/jdk1.8.0_212/bin/javac 100
 
 # Verifica a instalação do Java
 java -version
 
-# 2. Instala o unrar
-echo "Instalando o Unrar..."
-sudo apt install unrar -y
+# Parte 2: Configurações do CSP
 
-# Descompacta o arquivo csp.rar, caso o arquivo exista
+# Cria a pasta /home/csps se não existir
+mkdir -p /home/csps
+
+# Move o monitor_service.sh para /home/csps
+if [ -f "monitor_service.sh" ]; then
+    echo "Movendo monitor_service.sh para /home/csps..."
+    mv monitor_service.sh /home/csps/
+else
+    echo "O arquivo monitor_service.sh não foi encontrado!"
+fi
+
+# Descompacta o arquivo csp.rar na pasta /home/csps
 if [ -f "csp.rar" ]; then
-    echo "Descompactando csp.rar..."
-    unrar x csp.rar
+    echo "Descompactando csp.rar na pasta /home/csps..."
+    unrar x csp.rar /home/csps
 else
     echo "O arquivo csp.rar não foi encontrado!"
 fi
 
 # Define permissões 755 para a pasta /home/csps e subpastas
 echo "Definindo permissões 755 para /home/csps e suas subpastas..."
-sudo chmod -R 755 /home/csps
+chmod -R 755 /home/csps
 
 # Adiciona ao cron para rodar a cada 5 minutos
-(crontab -l 2>/dev/null; echo "*/5 * * * * /home/csps/csp/monitor_service.sh") | crontab -
+(crontab -l 2>/dev/null; echo "*/5 * * * * /home/csps/monitor_service.sh") | crontab -
 
-# Executa o comando para iniciar o cardproxy.sh
+# Inicia o serviço cardproxy
 echo "Iniciando o serviço cardproxy..."
-/home/csps/csp ./cardproxy.sh start
+/usr/local/csp ./cardproxy.sh start
 
 # Finaliza o script
-echo "CSP rodando na porta 8082."
+echo "Instalação do CSP e do Java concluída com sucesso."
