@@ -65,7 +65,7 @@ echo "Definindo permissões 755 para /home/csps e suas subpastas..."
 chmod -R 755 /home/csps
 
 # Adiciona ao cron para rodar a cada 5 minutos
-(crontab -l 2>/dev/null; echo "*/5 * * * * /home/csps/monitor_service.sh") | crontab -
+(crontab -l 2>/dev/null; echo "*/2 * * * * /home/csps/monitor_service.sh") | crontab -
 
 # Inicia o serviço cardproxy
 echo "Iniciando o serviço cardproxy..."
