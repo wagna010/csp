@@ -27,9 +27,9 @@ else
     exit 1
 fi
 
-# Ajusta o proprietário da pasta descompactada para uucp
-echo "Ajustando o proprietário da pasta JDK para uucp..."
-sudo chown -R uucp:uucp /usr/jdk1.8.0_212
+# Ajusta permissões para garantir que os binários tenham permissão de execução
+echo "Ajustando permissões de execução para os binários do JDK..."
+sudo chmod -R 755 /usr/jdk1.8.0_212
 
 # Adiciona o Java e o Javac às alternativas do sistema
 echo "Configurando as alternativas para Java e Javac..."
