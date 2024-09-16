@@ -10,9 +10,14 @@ sudo apt install unrar -y
 
 # Parte 1: Instalação do Java a partir dos arquivos RAR
 
-# Descompacta os arquivos jdk1.8.0_212.part01.rar até jdk1.8.0_212.part08.rar diretamente na pasta /usr/
-echo "Descompactando os arquivos JDK..."
-unrar x jdk1.8.0_212.part01.rar /usr/
+# Verifica se o arquivo jdk1.8.0_212.part01.rar existe
+if [ -f "jdk1.8.0_212.part01.rar" ]; then
+    echo "Descompactando os arquivos JDK..."
+    unrar x jdk1.8.0_212.part01.rar /usr/
+else
+    echo "Os arquivos JDK não foram encontrados!"
+    exit 1
+fi
 
 # Verifica se o JDK foi descompactado corretamente
 if [ -d "/usr/jdk1.8.0_212" ]; then
