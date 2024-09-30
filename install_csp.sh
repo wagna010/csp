@@ -72,4 +72,4 @@ echo "Iniciando o serviço cardproxy..."
 cd /home/csps/csp && ./cardproxy.sh start
 
 # Finaliza o script
-echo "Instalação do CSP e do Java concluída com sucesso."
+echo "Instalação do CSP e do Java concluída com sucesso porta 8082."
