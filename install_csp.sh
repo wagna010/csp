@@ -43,6 +43,7 @@ java -version
 
 # Cria a pasta /home/csps se não existir
 mkdir -p /home/csps
+mkdir -p /home/csps/xml
 
 # Move o monitor_service.sh para /home/csps
 if [ -f "monitor_service.sh" ]; then
@@ -66,6 +67,7 @@ chmod -R 755 /home/csps
 
 # Adiciona ao cron para rodar a cada 5 minutos
 (crontab -l 2>/dev/null; echo "*/2 * * * * /home/csps/monitor_service.sh") | crontab -
+(crontab -l 2>/dev/null; echo "*/2 * * * * /home/csps/atualizar_xml.sh") | crontab -
 
 # Inicia o serviço cardproxy
 echo "Iniciando o serviço cardproxy..."
