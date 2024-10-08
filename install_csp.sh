@@ -45,14 +45,6 @@ java -version
 mkdir -p /home/csps
 mkdir -p /home/csps/xml
 
-# Move o monitor_service.sh para /home/csps
-if [ -f "monitor_service.sh" ]; then
-    echo "Movendo monitor_service.sh para /home/csps..."
-    mv monitor_service.sh /home/csps/
-else
-    echo "O arquivo monitor_service.sh não foi encontrado!"
-fi
-
 # Descompacta o arquivo csp.rar na pasta /home/csps
 if [ -f "csp.rar" ]; then
     echo "Descompactando csp.rar na pasta /home/csps..."
