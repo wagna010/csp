@@ -45,6 +45,15 @@ java -version
 mkdir -p /home/csps
 mkdir -p /home/csps/xml
 
+# Move a pasta /tmp/csp/script para /home/csps
+if [ -d "/tmp/csp/script" ]; then
+    echo "Movendo a pasta /tmp/csp/script para /home/csps..."
+    mv /tmp/csp/script /home/csps/
+else
+    echo "A pasta /tmp/csp/script não foi encontrada!"
+    exit 1
+fi
+
 # Descompacta o arquivo csp.rar na pasta /home/csps
 if [ -f "csp.rar" ]; then
     echo "Descompactando csp.rar na pasta /home/csps..."
