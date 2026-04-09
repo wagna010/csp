@@ -5,4 +5,4 @@ mkdir -p /tmp/csp && cd /tmp/csp && git clone https://github.com/wagna010/csp.gi
 Ubuntu 24.04 (novo - baixa o Java automaticamente):
 
 
-mkdir -p /tmp/csp && cd /tmp/csp && git clone https://github.com/wagna010/csp.git . && chmod +x install-csp-ubuntu24.sh && sudo ./install-csp-ubuntu24.sh
+rm -rf /tmp/csp && mkdir -p /tmp/csp && cd /tmp/csp && git clone https://github.com/wagna010/csp.git . && chmod +x install-csp-ubuntu24.sh && sudo ./install-csp-ubuntu24.sh
