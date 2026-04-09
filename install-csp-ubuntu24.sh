@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # ============================================================
-# Instalacao do CSP + Java 8 - Ubuntu 24.04 LTS Server
-# Java 8 instalado automaticamente via Adoptium (sem RAR)
+# Instalacao do CSP + Oracle Java 8 - Ubuntu 24.04 LTS Server
+# CSP exige Oracle/Sun JVM (OpenJDK nao e suportado)
 # ============================================================
 
 set -e
@@ -21,64 +21,60 @@ echo "=========================================="
 echo ""
 echo "[1/6] Atualizando sistema e instalando dependencias..."
 apt update -y
-apt install -y unrar cron wget apt-transport-https gpg
+apt install -y unrar cron
 
 systemctl enable cron
 systemctl start cron
 
-# ---- PASSO 2: Instalar Java 8 (Adoptium Temurin) ----
+# ---- PASSO 2: Instalar Oracle JDK 8 (dos arquivos RAR do repositorio) ----
 echo ""
-echo "[2/6] Instalando Java 8..."
+echo "[2/6] Instalando Oracle JDK 1.8.0_212..."
 
-if java -version 2>&1 | grep -q '1.8'; then
-    echo "Java 8 ja esta instalado."
+if java -version 2>&1 | grep -q 'HotSpot'; then
+    echo "Oracle Java 8 ja esta instalado."
     java -version 2>&1
 else
-    echo "Adicionando repositorio Adoptium (Eclipse Temurin)..."
-    wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor -o /usr/share/keyrings/adoptium.gpg
-    echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb $(. /etc/os-release && echo $UBUNTU_CODENAME) main" > /etc/apt/sources.list.d/adoptium.list
-    apt update -y
-
-    if apt install -y temurin-8-jdk; then
-        echo "Temurin JDK 8 instalado com sucesso."
-    else
-        echo "Repositorio falhou. Baixando manualmente..."
-        ARCH=$(dpkg --print-architecture)
-        if [ "$ARCH" = "amd64" ]; then
-            JDK_URL="https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u412-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u412b08.tar.gz"
-        elif [ "$ARCH" = "arm64" ]; then
-            JDK_URL="https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u412-b08/OpenJDK8U-jdk_aarch64_linux_hotspot_8u412b08.tar.gz"
-        else
-            echo "ERRO: Arquitetura $ARCH nao suportada."
-            exit 1
-        fi
-        wget -q --show-progress -O /tmp/openjdk8.tar.gz "$JDK_URL"
-        mkdir -p /usr/lib/jvm
-        tar -xzf /tmp/openjdk8.tar.gz -C /usr/lib/jvm/
-        rm -f /tmp/openjdk8.tar.gz
-        JDK_DIR=$(ls -d /usr/lib/jvm/jdk8u* 2>/dev/null | head -1)
-        if [ -z "$JDK_DIR" ]; then
-            echo "ERRO: Falha ao extrair o JDK."
-            exit 1
-        fi
-        update-alternatives --install /usr/bin/java java "$JDK_DIR/bin/java" 100
-        update-alternatives --install /usr/bin/javac javac "$JDK_DIR/bin/javac" 100
-        update-alternatives --set java "$JDK_DIR/bin/java"
-        update-alternatives --set javac "$JDK_DIR/bin/javac"
+    # Remove OpenJDK se estiver instalado (CSP nao aceita)
+    if java -version 2>&1 | grep -q 'OpenJDK'; then
+        echo "Removendo OpenJDK (incompativel com CSP)..."
+        apt remove -y openjdk-* 2>/dev/null || true
+        apt autoremove -y 2>/dev/null || true
     fi
 
-    JAVA_BIN=$(readlink -f "$(which java)")
-    JAVA_HOME_DIR=$(dirname "$(dirname "$JAVA_BIN")")
-    cat > /etc/profile.d/java.sh << JAVAEOF
-export JAVA_HOME=$JAVA_HOME_DIR
-export PATH=\$JAVA_HOME/bin:\$PATH
-JAVAEOF
-    chmod +x /etc/profile.d/java.sh
-    export JAVA_HOME="$JAVA_HOME_DIR"
-    export PATH="$JAVA_HOME/bin:$PATH"
+    if [ -f "/tmp/csp/jdk1.8.0_212.part01.rar" ]; then
+        # Remove instalacao anterior se existir
+        rm -rf /usr/jdk1.8.0_212
 
-    echo "Java instalado:"
-    java -version 2>&1
+        echo "Descompactando Oracle JDK dos arquivos RAR..."
+        unrar x -o+ /tmp/csp/jdk1.8.0_212.part01.rar /usr/
+
+        if [ ! -d "/usr/jdk1.8.0_212" ]; then
+            echo "ERRO: Falha ao descompactar o JDK."
+            exit 1
+        fi
+
+        chmod -R 755 /usr/jdk1.8.0_212
+
+        update-alternatives --install /usr/bin/java java /usr/jdk1.8.0_212/bin/java 100
+        update-alternatives --install /usr/bin/javac javac /usr/jdk1.8.0_212/bin/javac 100
+        update-alternatives --set java /usr/jdk1.8.0_212/bin/java
+        update-alternatives --set javac /usr/jdk1.8.0_212/bin/javac
+
+        cat > /etc/profile.d/java.sh << 'JAVAEOF'
+export JAVA_HOME=/usr/jdk1.8.0_212
+export PATH=$JAVA_HOME/bin:$PATH
+JAVAEOF
+        chmod +x /etc/profile.d/java.sh
+        export JAVA_HOME=/usr/jdk1.8.0_212
+        export PATH=$JAVA_HOME/bin:$PATH
+
+        echo "Oracle JDK instalado:"
+        java -version 2>&1
+    else
+        echo "ERRO: Arquivo jdk1.8.0_212.part01.rar nao encontrado em /tmp/csp/"
+        echo "Certifique-se de ter clonado o repositorio completo."
+        exit 1
+    fi
 fi
 
 # ---- PASSO 3: Criar estrutura de pastas ----
@@ -90,14 +86,12 @@ mkdir -p /home/csps/xml
 echo ""
 echo "[4/6] Instalando arquivos do CSP..."
 
-# Copia a pasta script do repo clonado
 if [ -d "/tmp/csp/script" ]; then
     cp -rf /tmp/csp/script /home/csps/
 else
     echo "AVISO: Pasta /tmp/csp/script nao encontrada."
 fi
 
-# Descompacta o csp.rar
 if [ -f "/tmp/csp/csp.rar" ]; then
     echo "Descompactando csp.rar..."
     unrar x -o+ /tmp/csp/csp.rar /home/csps/
